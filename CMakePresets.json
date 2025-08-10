@@ -1,0 +1,30 @@
+{
+  "version": 4,
+  "cmakeMinimumRequired": { "major": 3, "minor": 21 },
+  "configurePresets": [
+    {
+      "name": "default-debug",
+      "displayName": "Default Debug",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "AEGIS_BUILD_PYTHON": "ON",
+        "AEGIS_ENABLE_CUDA": "ON"
+      }
+    },
+    {
+      "name": "default-release",
+      "displayName": "Default Release",
+      "binaryDir": "${sourceDir}/build-release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "AEGIS_BUILD_PYTHON": "ON",
+        "AEGIS_ENABLE_CUDA": "ON"
+      }
+    }
+  ],
+  "buildPresets": [
+    { "name": "build-debug",   "configurePreset": "default-debug" },
+    { "name": "build-release", "configurePreset": "default-release" }
+  ]
+}
