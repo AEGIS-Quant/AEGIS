@@ -1,0 +1,1 @@
+add_library(hedge_smith_core INTERFACE)

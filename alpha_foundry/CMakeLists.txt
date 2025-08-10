@@ -1,0 +1,1 @@
+add_library(alpha_foundry_core INTERFACE)
