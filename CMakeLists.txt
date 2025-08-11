@@ -3,12 +3,13 @@ project(AEGIS LANGUAGES CXX)
 
 option(AEGIS_ENABLE_CUDA  "Enable CUDA if available" ON)
 option(AEGIS_BUILD_PYTHON "Build Python bindings"    ON)
+option(AEGIS_BUILD_TESTS  "Build and run C++/Python tests" ON)  # <-- add
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-# Try to enable CUDA if available (no hard fail)
+# CUDA (best-effort)
 if (AEGIS_ENABLE_CUDA)
   include(CheckLanguage)
   check_language(CUDA)
@@ -18,10 +19,10 @@ if (AEGIS_ENABLE_CUDA)
   endif ()
 endif ()
 
-# Where we’ll place built Python artifacts
+# Python artifacts location
 set(AEGIS_PY_OUT ${CMAKE_BINARY_DIR}/python/aegis)
 
-# Fetch pybind11 if we’re building Python bindings
+# pybind11 if building Python bindings
 if (AEGIS_BUILD_PYTHON)
   include(FetchContent)
   FetchContent_Declare(
@@ -38,24 +39,21 @@ add_subdirectory(alpha_foundry)
 add_subdirectory(hedge_smith)
 add_subdirectory(orca)
 
+# ---- Testing (root handles CTest) ------------------------------------------
 include(CTest)
-enable_testing()
+if (AEGIS_BUILD_TESTS)
+  enable_testing()
 
-if (BUILD_TESTING AND AEGIS_BUILD_PYTHON)
-  # We only need a Python interpreter
-  find_package(Python3 COMPONENTS Interpreter REQUIRED)
-
-  # Run python with both build/python and python on sys.path
-  add_test(
-    NAME python_import_hello
-    COMMAND
-      ${Python3_EXECUTABLE}
-      -c
-      "import sys; sys.path[:0]=['${CMAKE_BINARY_DIR}/python','${CMAKE_SOURCE_DIR}/python']; import aegis; print(aegis.hello())"
-  )
-
-  # Pass if the output contains the expected string
-  set_tests_properties(python_import_hello
-    PROPERTIES PASS_REGULAR_EXPRESSION "hello from forge_core")
+  if (BUILD_TESTING AND AEGIS_BUILD_PYTHON)
+    find_package(Python3 COMPONENTS Interpreter REQUIRED)
+    add_test(
+      NAME python_import_hello
+      COMMAND
+        ${Python3_EXECUTABLE}
+        -c
+        "import sys; sys.path[:0]=['${CMAKE_BINARY_DIR}/python','${CMAKE_SOURCE_DIR}/python']; import aegis; print(aegis.hello())"
+    )
+    set_tests_properties(python_import_hello
+      PROPERTIES PASS_REGULAR_EXPRESSION "hello from forge_core")
+  endif ()
 endif ()
-
